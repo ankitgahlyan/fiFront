@@ -53,77 +53,77 @@ export function getTonClient(): TonClient {
 /**
  * Create wallet from mnemonic
  */
-// export async function walletFromMnemonic(mnemonic: string): Promise<WalletData> {
-// 	const mnemonicArray = mnemonic.trim().split(' ');
-// 	const keyPair = await mnemonicToPrivateKey(mnemonicArray);
+export async function walletFromMnemonic(mnemonic: string): Promise<WalletData> {
+	const mnemonicArray = mnemonic.trim().split(' ');
+	const keyPair = await mnemonicToPrivateKey(mnemonicArray);
 
-// 	const workchain = 0;
-// 	const wallet = WalletContractV4.create({
-// 		workchain,
-// 		publicKey: keyPair.publicKey
-// 	});
+	const workchain = 0;
+	const wallet = WalletContractV4.create({
+		workchain,
+		publicKey: keyPair.publicKey
+	});
 
-// 	return {
-// 		address: wallet.address.toString({ testOnly: true }),
-// 		publicKey: keyPair.publicKey.toString('hex'),
-// 		secretKey: keyPair.secretKey.toString('hex')
-// 	};
-// }
+	return {
+		address: wallet.address.toString({ testOnly: true }),
+		publicKey: keyPair.publicKey.toString('hex'),
+		secretKey: keyPair.secretKey.toString('hex')
+	};
+}
 
 /**
  * Get wallet balance
  */
-// export async function getBalance(address: string): Promise<bigint> {
-// 	try {
-// 		const client = getTonClient();
-// 		const balance = await client.getBalance(Address.parse(address));
-// 		return balance; // Convert to TON
-// 	} catch (error) {
-// 		console.error('Error getting balance:', error);
-// 		return BigInt(0);
-// 	}
-// }
+export async function getBalance(address: string): Promise<bigint> {
+	try {
+		const client = getTonClient();
+		const balance = await client.getBalance(Address.parse(address));
+		return balance; // Convert to TON
+	} catch (error) {
+		console.error('Error getting balance:', error);
+		return BigInt(0);
+	}
+}
 
 /**
  * Send TON
  */
-// export async function sendTon(
-// 	fromMnemonic: string,
-// 	toAddress: string,
-// 	amount: number,
-// ): Promise<SendResult> {
-// 	try {
-// 		const mnemonicArray = fromMnemonic.trim().split(' ');
-// 		const keyPair = await mnemonicToPrivateKey(mnemonicArray);
+export async function sendTon(
+	fromMnemonic: string,
+	toAddress: string,
+	amount: number,
+): Promise<SendResult> {
+	try {
+		const mnemonicArray = fromMnemonic.trim().split(' ');
+		const keyPair = await mnemonicToPrivateKey(mnemonicArray);
 
-// 		const wallet = WalletContractV4.create({
-// 			workchain: 0,
-// 			publicKey: keyPair.publicKey
-// 		});
+		const wallet = WalletContractV4.create({
+			workchain: 0,
+			publicKey: keyPair.publicKey
+		});
 
-// 		const client = getTonClient();
-// 		const contract = client.open(wallet);
+		const client = getTonClient();
+		const contract = client.open(wallet);
 
-// 		const seqno = await contract.getSeqno();
+		const seqno = await contract.getSeqno();
 
-// 		await contract.sendTransfer({
-// 			seqno,
-// 			secretKey: keyPair.secretKey,
-// 			messages: [
-// 				internal({
-// 					to: Address.parse(toAddress),
-// 					value: toNano(amount),
-// 					body: ''
-// 				})
-// 			]
-// 		});
+		await contract.sendTransfer({
+			seqno,
+			secretKey: keyPair.secretKey,
+			messages: [
+				internal({
+					to: Address.parse(toAddress),
+					value: toNano(amount),
+					body: ''
+				})
+			]
+		});
 
-// 		return { success: true };
-// 	} catch (error) {
-// 		console.error('Error sending TON:', error);
-// 		return { success: false, error: String(error) };
-// 	}
-// }
+		return { success: true };
+	} catch (error) {
+		console.error('Error sending TON:', error);
+		return { success: false, error: String(error) };
+	}
+}
 
 /**
  * Get jetton balance
@@ -278,17 +278,17 @@ export async function getTransactions(
 /**
  * Popular jettons for quick access
  */
-// export const POPULAR_JETTONS: Jetton[] = [
-// 	{
-// 		name: 'Tether USD',
-// 		symbol: 'USDT',
-// 		masterAddress: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
-// 		decimals: 6
-// 	},
-// 	{
-// 		name: 'STON',
-// 		symbol: 'STON',
-// 		masterAddress: 'EQA2kCVNwVsil2EM2mB0SkXytxCqQjS4mttjDpnXmwG9T6bO',
-// 		decimals: 9
-// 	}
-// ];
+export const POPULAR_JETTONS: Jetton[] = [
+	{
+		name: 'Tether USD',
+		symbol: 'USDT',
+		masterAddress: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+		decimals: 6
+	},
+	{
+		name: 'STON',
+		symbol: 'STON',
+		masterAddress: 'EQA2kCVNwVsil2EM2mB0SkXytxCqQjS4mttjDpnXmwG9T6bO',
+		decimals: 9
+	}
+];

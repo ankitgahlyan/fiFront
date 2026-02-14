@@ -2,6 +2,7 @@ import { writable, derived, get } from 'svelte/store';
 import { THEME, TonConnectUI, type Wallet } from '@tonconnect/ui';
 import { Address } from '@ton/core';
 import { browser } from '$app/environment';
+import { MANIFEST_URL } from '@/consts';
 
 // TonConnect UI instance
 let tonConnectUI: TonConnectUI | null = null;
@@ -18,7 +19,7 @@ export function initTonConnect() {
 	if (!browser || tonConnectUI) return;
 
 	tonConnectUI = new TonConnectUI({
-		manifestUrl: 'https://ankitgahlyan.github.io/fossfiat/tonconnect-manifest.json',
+		manifestUrl: MANIFEST_URL,
 		buttonRootId: 'ton-connect-button',
 		analytics: { mode: 'off' },
 		uiPreferences: {
@@ -26,21 +27,15 @@ export function initTonConnect() {
 		}
 	});
 
-	// tonConnectUI.getWallets().then(wallets => {
-	//     console.log('Available wallets:', wallets);
-	// }).catch(error => {
-	//     console.error('Error fetching wallets:', error);
-	// });
+	// Set initial wallet state
+	if (tonConnectUI.wallet) {
+		wallet.set(tonConnectUI.wallet);
+	}
 
 	// Subscribe to wallet changes
 	tonConnectUI.onStatusChange((walletInfo) => {
 		wallet.set(walletInfo);
 	});
-
-	// Set initial wallet state
-	if (tonConnectUI.wallet) {
-		wallet.set(tonConnectUI.wallet);
-	}
 }
 
 // Connect wallet

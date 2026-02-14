@@ -19,6 +19,8 @@
 	let balance = $state('loading...');
 
 	onMount(() => {
+		const stored = localStorage.getItem('balance');
+		if (stored) {balance = stored}
 		getBalance();
 		// loadState();
 		// getState();
@@ -28,32 +30,34 @@
 		try {
 			if (!$userAddress) throw new Error('Wallet not connected');
 			balance = fromNano((await (await getFiJetton($userAddress!)).getGetWalletData()).balance);
+			localStorage.setItem('balance', balance)
 		} catch (e: any) {
 			error = e.message || 'failed to get balance';
 		}
 	}
-	function loadState() {
-		loading = true;
-		try {
-			if (!$userAddress) throw new Error('Wallet not connected');
-			// jettonStateFull = localStorage.getItem('jettonStateFull');
-			throw new Error
-		} catch (e) {
-			getState();
-		}
-	}
 
-	async function getState() {
-		// loading = true;
-		try {
-			// if (!$userAddress) throw new Error('Wallet not connected');
-			jettonStateFull = await (await getFiJetton($userAddress!)).getGetWalletDataFull();
-		} catch (e: any) {
-			error = e.message || 'Failed to fetch state';
-		} finally {
-			loading = false;
-		}
-	}
+	// function loadState() {
+	// 	loading = true;
+	// 	try {
+	// 		if (!$userAddress) throw new Error('Wallet not connected');
+	// 		// jettonStateFull = localStorage.getItem('jettonStateFull');
+	// 		throw new Error
+	// 	} catch (e) {
+	// 		getState();
+	// 	}
+	// }
+
+	// async function getState() {
+	// 	// loading = true;
+	// 	try {
+	// 		// if (!$userAddress) throw new Error('Wallet not connected');
+	// 		jettonStateFull = await (await getFiJetton($userAddress!)).getGetWalletDataFull();
+	// 	} catch (e: any) {
+	// 		error = e.message || 'Failed to fetch state';
+	// 	} finally {
+	// 		loading = false;
+	// 	}
+	// }
 
 	const features = [
 		{

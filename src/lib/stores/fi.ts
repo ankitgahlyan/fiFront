@@ -42,7 +42,7 @@ export async function sendTransfer(
 	toAddress: string,
 	amount: number,
 	customPayload: Cell | null = null,
-	forwardPayload: string = 'hahahaha'
+	forwardPayload: string = ''
 ) {
 	try {
 		const tonConnectUI = getTonConnectUI();
