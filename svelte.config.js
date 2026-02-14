@@ -10,7 +10,6 @@ const config = {
 		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 		adapter: adapter({
 			strict: false,
-			fallback: '200.html'
 		}),
 		alias: {
 			'@/*': './src/lib/*'
