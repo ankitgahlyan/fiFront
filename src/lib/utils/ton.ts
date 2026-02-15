@@ -3,13 +3,15 @@ import { ENDPOINT, FI_ADDRESS } from '../consts';
 import {
 	TonClient,
 	Address,
-	WalletContractV4,
+	WalletContractV5R1,
 	internal,
 	beginCell,
 	toNano,
-	type CommonMessageInfo
+	type CommonMessageInfo,
+	SendMode
 } from '@ton/ton';
 import { mnemonicToPrivateKey } from '@ton/crypto';
+import { fromNano } from '@ton/core';
 
 let tonClient: TonClient | null = null;
 
@@ -53,18 +55,17 @@ export function getTonClient(): TonClient {
 /**
  * Create wallet from mnemonic
  */
-export async function walletFromMnemonic(mnemonic: string): Promise<WalletData> {
+export async function walletFromMnemonic(mnemonic: string, isTestnet: boolean = true): Promise<WalletData> {
 	const mnemonicArray = mnemonic.trim().split(' ');
 	const keyPair = await mnemonicToPrivateKey(mnemonicArray);
 
-	const workchain = 0;
-	const wallet = WalletContractV4.create({
-		workchain,
+	const wallet = WalletContractV5R1.create({
+		workchain: 0,
 		publicKey: keyPair.publicKey
 	});
 
 	return {
-		address: wallet.address.toString({ testOnly: true }),
+		address: wallet.address.toString({ testOnly: isTestnet }),
 		publicKey: keyPair.publicKey.toString('hex'),
 		secretKey: keyPair.secretKey.toString('hex')
 	};
@@ -73,14 +74,14 @@ export async function walletFromMnemonic(mnemonic: string): Promise<WalletData> 
 /**
  * Get wallet balance
  */
-export async function getBalance(address: string): Promise<bigint> {
+export async function getBalance(address: string): Promise<number> {
 	try {
 		const client = getTonClient();
 		const balance = await client.getBalance(Address.parse(address));
-		return balance; // Convert to TON
+		return Number(fromNano(balance)); // Convert to TON
 	} catch (error) {
 		console.error('Error getting balance:', error);
-		return BigInt(0);
+		return 0;
 	}
 }
 
@@ -96,7 +97,7 @@ export async function sendTon(
 		const mnemonicArray = fromMnemonic.trim().split(' ');
 		const keyPair = await mnemonicToPrivateKey(mnemonicArray);
 
-		const wallet = WalletContractV4.create({
+		const wallet = WalletContractV5R1.create({
 			workchain: 0,
 			publicKey: keyPair.publicKey
 		});
@@ -109,6 +110,7 @@ export async function sendTon(
 		await contract.sendTransfer({
 			seqno,
 			secretKey: keyPair.secretKey,
+			sendMode: SendMode.PAY_GAS_SEPARATELY, // pay fee separately
 			messages: [
 				internal({
 					to: Address.parse(toAddress),
@@ -192,7 +194,7 @@ export async function sendJetton(
 		const mnemonicArray = fromMnemonic.trim().split(' ');
 		const keyPair = await mnemonicToPrivateKey(mnemonicArray);
 
-		const wallet = WalletContractV4.create({
+		const wallet = WalletContractV5R1.create({
 			workchain: 0,
 			publicKey: keyPair.publicKey
 		});
@@ -228,6 +230,7 @@ export async function sendJetton(
 		await contract.sendTransfer({
 			seqno,
 			secretKey: keyPair.secretKey,
+			sendMode: SendMode.PAY_GAS_SEPARATELY, // pay fee separately
 			messages: [
 				internal({
 					to: Address.parse(jettonWalletAddress),

@@ -110,7 +110,7 @@
 		<div class={previewCardClasses}>
 			<a
 				href="#card"
-				class="block max-w-md divide-y divide-surface-200-800 overflow-hidden card border-[1px] border-surface-200-800 preset-filled-surface-100-900 card-hover"
+				class="block max-w-md divide-y divide-surface-200-800 overflow-hidden card border border-surface-200-800 preset-filled-surface-100-900 card-hover"
 			>
 				<header>
 					<img

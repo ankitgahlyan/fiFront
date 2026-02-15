@@ -1,12 +1,14 @@
 import { FI_ADDRESS } from '$lib/consts';
 import { getTonClient } from '$lib/utils/ton';
-import { Address, beginCell, Cell, toNano, type OpenedContract } from '@ton/core';
-import { getTonConnectUI } from './tonconnect';
+import { Address, beginCell, Cell, fromNano, toNano, type OpenedContract } from '@ton/core';
+import { getTonConnectUI, userAddress } from './tonconnect';
 import { FossFi } from '$lib/FossFi';
 import { FossFiWallet } from '$lib/FossFiWallet';
 import { browser } from '$app/environment';
+import { get } from 'svelte/store';
 
 let fi: OpenedContract<FossFi> | null = null;
+let userAddr = get(userAddress);
 
 async function getFi() {
 	if (!fi) {
@@ -36,6 +38,36 @@ export async function getFiJetton(ownerAddress: Address) {
 	const jettonAddr = await getJettonAddr(ownerAddress);
 	return getTonClient().open(FossFiWallet.createFromAddress(jettonAddr));
 }
+
+export async function getBalance(): Promise<string> {
+	if (!userAddr) throw new Error('Wallet not connected');
+	let balance = fromNano((await (await getFiJetton(userAddr)).getGetWalletData()).balance);
+	localStorage.setItem('balance', balance)
+	return balance;
+}
+
+// function loadState() {
+// 	loading = true;
+// 	try {
+// 		if (!$userAddress) throw new Error('Wallet not connected');
+// 		// jettonStateFull = localStorage.getItem('jettonStateFull');
+// 		throw new Error
+// 	} catch (e) {
+// 		getState();
+// 	}
+// }
+
+// async function getState() {
+// 	// loading = true;
+// 	try {
+// 		// if (!$userAddress) throw new Error('Wallet not connected');
+// 		jettonStateFull = await (await getFiJetton($userAddress!)).getGetWalletDataFull();
+// 	} catch (e: any) {
+// 		error = e.message || 'Failed to fetch state';
+// 	} finally {
+// 		loading = false;
+// 	}
+// }
 
 export async function sendTransfer(
 	fromAddress: Address,

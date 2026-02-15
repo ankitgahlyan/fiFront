@@ -73,7 +73,7 @@
 		<div
 			class="bg-destructive/10 border-destructive/20 text-destructive flex items-center gap-2 rounded-lg border p-3"
 		>
-			<AlertCircle class="h-4 w-4 flex-shrink-0" />
+			<AlertCircle class="h-4 w-4 shrink-0" />
 			<p class="text-sm">{error}</p>
 		</div>
 	{/if}

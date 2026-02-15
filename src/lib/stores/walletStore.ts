@@ -276,13 +276,13 @@ function createWalletStore() {
 					return { success: false, error: 'Unable to get current state' };
 				}
 
-				const { wallets, activeWalletIndex, isTestnet } = currentState;
+				const { wallets, activeWalletIndex } = currentState;
 				const activeWallet = wallets[activeWalletIndex];
 
 				if (!activeWallet) return { success: false, error: 'No active wallet' };
 
 				// Get TON balance
-				const balance = await getBalance(activeWallet.address, isTestnet);
+				const balance = await getBalance(activeWallet.address);
 
 				// Get jetton balances
 				const jettonBalances = await Promise.all(
@@ -290,14 +290,13 @@ function createWalletStore() {
 						const jettonBalance = await getJettonBalance(
 							activeWallet.address,
 							jetton.masterAddress,
-							isTestnet
 						);
 						return { ...jetton, balance: jettonBalance };
 					})
 				);
 
 				// Get transactions
-				const transactions = await getTransactions(activeWallet.address, isTestnet);
+				const transactions = await getTransactions(activeWallet.address);
 
 				update((state) => {
 					const updatedWallets = [...state.wallets];
