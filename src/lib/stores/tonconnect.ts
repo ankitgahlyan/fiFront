@@ -11,6 +11,7 @@ let tonConnectUI: TonConnectUI | null = null;
 export const wallet = writable<Wallet | null>(null);
 export const connectedWallets = writable<Wallet[]>([]);
 export const activeWalletIndex = writable<number>(-1);
+export const walletInitializing = writable<boolean>(true);
 
 export const isConnected = derived(wallet, ($wallet) => $wallet !== null);
 export const userAddress = derived(wallet, ($wallet) =>
@@ -37,8 +38,12 @@ export function initTonConnect() {
 		activeWalletIndex.set(0);
 	}
 
+	// Mark initialization as complete
+	walletInitializing.set(false);
+
 	// Subscribe to wallet changes
 	tonConnectUI.onStatusChange((walletInfo) => {
+		walletInitializing.set(false);
 		if (walletInfo) {
 			wallet.set(walletInfo);
 			const currentWallets = get(connectedWallets);

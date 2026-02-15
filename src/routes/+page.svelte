@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { getBalance, sendTransfer } from '$lib/stores/fi';
-	import { isConnected, userAddress, connectedWallets, activeWalletIndex } from '$lib/stores/tonconnect';
+	import {
+		isConnected,
+		userAddress,
+		connectedWallets,
+		activeWalletIndex,
+		walletInitializing
+	} from '$lib/stores/tonconnect';
 	import WalletSelector from '$lib/components/WalletSelector.svelte';
 	// import type { FiJettonFullData } from '$lib/FossFiWallet';
 	// import Transfer from '$lib/components/fiJetton/Transfer.svelte';
@@ -33,15 +39,20 @@
 		const stored = localStorage.getItem('balance');
 		if (stored) {
 			balance = stored;
-		} else {
-			balance = await getBalance();
 		}
-		// loadState();
-		// getState();
+		try {
+			balance = await getBalance();
+		} catch (e) {
+			// Wallet not connected, ignore
+		}
+	});
 
-		// return () => {
-		// 	stopQRScanner();
-		// };
+	$effect(() => {
+		if ($userAddress) {
+			getBalance()
+				.then((b) => (balance = b))
+				.catch(() => {});
+		}
 	});
 
 	$effect(() => {
@@ -174,7 +185,11 @@
 	{/if}
 
 	<!-- Hero Section -->
-	{#if !$isConnected}
+	{#if $walletInitializing}
+		<div class="flex items-center justify-center py-12">
+			<div class="border-primary h-8 w-8 animate-spin rounded-full border-b-2"></div>
+		</div>
+	{:else if !$isConnected}
 		<div
 			class="from-primary/10 via-primary/5 to-background border-primary/20 relative overflow-hidden rounded-2xl border bg-linear-to-br p-8 md:p-12"
 		>
@@ -204,68 +219,69 @@
 	{/if}
 
 	<!-- Connected Wallets Selector -->
-	<WalletSelector />
+	{#if !$walletInitializing}
+		<WalletSelector />
 
-	<!-- Balance Card -->
-	{#if $userAddress}
-		<Card class="overflow-hidden">
-			<CardHeader class="bg-muted/50">
-				<div class="flex items-center justify-between">
-					<div>
-						<CardTitle class="flex items-center gap-2">
-							<Coins class="text-primary h-5 w-5" />
-							Your Balance
-						</CardTitle>
-						<CardDescription>MINT Token Balance</CardDescription>
-					</div>
-					<!-- <Badge variant="outline" class="font-mono">
+		<!-- Balance Card -->
+		{#if $userAddress}
+			<Card class="overflow-hidden">
+				<CardHeader class="bg-muted/50">
+					<div class="flex items-center justify-between">
+						<div>
+							<CardTitle class="flex items-center gap-2">
+								<Coins class="text-primary h-5 w-5" />
+								Your Balance
+							</CardTitle>
+							<CardDescription>MINT Token Balance</CardDescription>
+						</div>
+						<!-- <Badge variant="outline" class="font-mono">
 						{$userAddress}
 						{String($userAddress).slice(0, 6)}...{String($userAddress).slice(-4)}
 					</Badge> -->
-				</div>
-			</CardHeader>
-			<CardContent class="pt-6">
-				<div class="flex flex-col items-center justify-between gap-6 md:flex-row">
-					<div class="text-center md:text-left">
-						<p class="text-muted-foreground mb-1 text-sm">Available Balance</p>
-						<p class="text-4xl font-bold tracking-tight">
-							{balance} <span class="text-primary">MINT</span>
-						</p>
 					</div>
-					<div class="flex gap-3">
-						<Button variant="outline" onclick={async () => (balance = await getBalance())}>
-							<ArrowRightLeft class="mr-2 h-4 w-4" />
-							Refresh
-						</Button>
-						<Button variant="outline" onclick={() => goto('/send')}>
-							<ArrowRightLeft class="mr-2 h-4 w-4" />
-							Send
-						</Button>
-						<Button onclick={() => goto('/receive')}>
-							<Wallet class="mr-2 h-4 w-4" />
-							Receive
-						</Button>
+				</CardHeader>
+				<CardContent class="pt-6">
+					<div class="flex flex-col items-center justify-between gap-6 md:flex-row">
+						<div class="text-center md:text-left">
+							<p class="text-muted-foreground mb-1 text-sm">Available Balance</p>
+							<p class="text-4xl font-bold tracking-tight">
+								{balance} <span class="text-primary">MINT</span>
+							</p>
+						</div>
+						<div class="flex gap-3">
+							<Button variant="outline" onclick={async () => (balance = await getBalance())}>
+								<ArrowRightLeft class="mr-2 h-4 w-4" />
+								Refresh
+							</Button>
+							<Button variant="outline" onclick={() => goto('/send')}>
+								<ArrowRightLeft class="mr-2 h-4 w-4" />
+								Send
+							</Button>
+							<Button onclick={() => goto('/receive')}>
+								<Wallet class="mr-2 h-4 w-4" />
+								Receive
+							</Button>
+						</div>
 					</div>
-				</div>
-			</CardContent>
-		</Card>
+				</CardContent>
+			</Card>
 
-		<!-- Transfer Section -->
-		<Card>
-			<CardHeader>
-				<div class="flex items-center gap-3">
-					<div class="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
-						<Send class="text-primary h-5 w-5" />
+			<!-- Transfer Section -->
+			<Card>
+				<CardHeader>
+					<div class="flex items-center gap-3">
+						<div class="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+							<Send class="text-primary h-5 w-5" />
+						</div>
+						<div>
+							<CardTitle>Send Funds</CardTitle>
+							<CardDescription>Transfer TONs or Zettons</CardDescription>
+						</div>
 					</div>
-					<div>
-						<CardTitle>Send Funds</CardTitle>
-						<CardDescription>Transfer TONs or Zettons</CardDescription>
-					</div>
-				</div>
-			</CardHeader>
-			<CardContent class="space-y-6">
-				<!-- Asset Selection -->
-				<!-- <div class="space-y-2">
+				</CardHeader>
+				<CardContent class="space-y-6">
+					<!-- Asset Selection -->
+					<!-- <div class="space-y-2">
 				<Label>Asset</Label>
 				<div class="flex flex-wrap gap-2">
 					{#each availableAssets as asset}
@@ -282,67 +298,67 @@
 				</div>
 			</div> -->
 
-				<!-- Recipient -->
-				<div class="space-y-2">
-					<div class="flex items-center justify-between">
-						<Label for="recipient">Recipient Address</Label>
-						<Button
-							variant="ghost"
-							size="sm"
-							onclick={initializeQRScanner}
-							class="h-auto p-1"
-							title="Scan QR code"
-						>
-							<QrCode class="h-4 w-4" />
-						</Button>
-					</div>
-					<Input
-						id="recipient"
-						type="text"
-						bind:value={recipient}
-						placeholder="0Q..."
-						class="font-mono"
-					/>
-				</div>
-
-				<!-- Amount -->
-				<div class="space-y-2">
-					<Label for="amount">Amount</Label>
-					<div class="relative">
+					<!-- Recipient -->
+					<div class="space-y-2">
+						<div class="flex items-center justify-between">
+							<Label for="recipient">Recipient Address</Label>
+							<Button
+								variant="ghost"
+								size="sm"
+								onclick={initializeQRScanner}
+								class="h-auto p-1"
+								title="Scan QR code"
+							>
+								<QrCode class="h-4 w-4" />
+							</Button>
+						</div>
 						<Input
-							id="amount"
-							type="number"
-							bind:value={amount}
-							placeholder="0.0 Coins"
-							step="1"
-							min="0"
+							id="recipient"
+							type="text"
+							bind:value={recipient}
+							placeholder="0Q..."
+							class="font-mono"
 						/>
-						<span class="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 text-sm">
-							{selectedAsset}
-						</span>
 					</div>
-				</div>
 
-				<!-- Send Button -->
-				<Button
-					class="w-full"
-					size="lg"
-					onclick={handleSend}
-					disabled={isSending || !recipient || !amount}
-				>
-					{#if isSending}
-						<div
-							class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-						></div>
-						Sending...
-					{:else}
-						<Send class="mr-2 h-4 w-4" />
-						Send {selectedAsset}
-					{/if}
-				</Button>
-			</CardContent>
-		</Card>
-		<!-- <Card>
+					<!-- Amount -->
+					<div class="space-y-2">
+						<Label for="amount">Amount</Label>
+						<div class="relative">
+							<Input
+								id="amount"
+								type="number"
+								bind:value={amount}
+								placeholder="0.0 Coins"
+								step="1"
+								min="0"
+							/>
+							<span class="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 text-sm">
+								{selectedAsset}
+							</span>
+						</div>
+					</div>
+
+					<!-- Send Button -->
+					<Button
+						class="w-full"
+						size="lg"
+						onclick={handleSend}
+						disabled={isSending || !recipient || !amount}
+					>
+						{#if isSending}
+							<div
+								class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+							></div>
+							Sending...
+						{:else}
+							<Send class="mr-2 h-4 w-4" />
+							Send {selectedAsset}
+						{/if}
+					</Button>
+				</CardContent>
+			</Card>
+			<!-- <Card>
 			<CardHeader>
 				<CardTitle>Transfer Tokens</CardTitle>
 				<CardDescription>Send MINT tokens to another address</CardDescription>
@@ -351,20 +367,21 @@
 				<Transfer />
 			</CardContent>
 		</Card> -->
-	{:else}
-		<Card class="border-dashed">
-			<CardContent class="flex flex-col items-center justify-center py-12 text-center">
-				<div class="bg-primary/10 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-					<Wallet class="text-primary h-8 w-8" />
-				</div>
-				<h3 class="mb-2 text-lg font-semibold">Connect Your Wallet</h3>
-				<p class="text-muted-foreground mb-6 max-w-sm">
-					Connect your TON wallet to view your balance and make transfers.
-				</p>
-				<p class="text-muted-foreground text-sm">Use the connect button in the header above</p>
-				<div id="ton-connect-button"></div>
-			</CardContent>
-		</Card>
+		{:else}
+			<Card class="border-dashed">
+				<CardContent class="flex flex-col items-center justify-center py-12 text-center">
+					<div class="bg-primary/10 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+						<Wallet class="text-primary h-8 w-8" />
+					</div>
+					<h3 class="mb-2 text-lg font-semibold">Connect Your Wallet</h3>
+					<p class="text-muted-foreground mb-6 max-w-sm">
+						Connect your TON wallet to view your balance and make transfers.
+					</p>
+					<p class="text-muted-foreground text-sm">Use the connect button in the header above</p>
+					<div id="ton-connect-button"></div>
+				</CardContent>
+			</Card>
+		{/if}
 	{/if}
 
 	<Separator />

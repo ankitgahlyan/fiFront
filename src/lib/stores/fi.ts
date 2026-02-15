@@ -8,7 +8,6 @@ import { browser } from '$app/environment';
 import { get } from 'svelte/store';
 
 let fi: OpenedContract<FossFi> | null = null;
-let userAddr = get(userAddress);
 
 async function getFi() {
 	if (!fi) {
@@ -31,7 +30,7 @@ export async function getJettonAddr(ownerAddress: Address) {
 	}
 	localStorage.setItem(ownerAddress.toString(), jettonAddr.toString());
 	return jettonAddr;
-};
+}
 
 // for calling getters only
 export async function getFiJetton(ownerAddress: Address) {
@@ -40,9 +39,10 @@ export async function getFiJetton(ownerAddress: Address) {
 }
 
 export async function getBalance(): Promise<string> {
+	const userAddr = get(userAddress);
 	if (!userAddr) throw new Error('Wallet not connected');
 	let balance = fromNano((await (await getFiJetton(userAddr)).getGetWalletData()).balance);
-	localStorage.setItem('balance', balance)
+	localStorage.setItem('balance', balance);
 	return balance;
 }
 

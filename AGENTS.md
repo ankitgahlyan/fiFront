@@ -4,6 +4,8 @@
 
 ## MCP Servers
 
+If you are unsure how to do something, use `gh_grep` to search code examples from GitHub.
+
 ### Svelte MCP Server
 
 This project uses Svelte 5 and SvelteKit with comprehensive MCP tooling:
@@ -24,35 +26,36 @@ This project uses Svelte 5 and SvelteKit with comprehensive MCP tooling:
 ### Context7 MCP
 
 Always use Context7 MCP when needing library/API documentation, code generation, or setup/configuration steps.
+When you need to search docs, use `context7` tools.
 
 ## Commands
 
 ### Build & Development
 
 ```bash
-npm run dev          # Start dev server
-npm run build        # Production build
-npm run preview      # Preview production build
+pnpm dev          # Start dev server
+pnpm build        # Production build
+pnpm preview      # Preview production build
 ```
 
 ### Testing
 
 ```bash
-npm run test         # Run all tests (unit + e2e)
-npm run test:unit    # Run Vitest unit tests
-npm run test:unit -- --run              # Run once (CI mode)
-npm run test:unit -- --run src/demo.spec.js  # Run single test file
-npm run test:e2e     # Run Playwright e2e tests
+pnpm test         # Run all tests (unit + e2e)
+pnpm test:unit    # Run Vitest unit tests
+pnpm test:unit -- --run              # Run once (CI mode)
+pnpm test:unit -- --run src/demo.spec.js  # Run single test file
+pnpm test:e2e     # Run Playwright e2e tests
 npx vitest --run src/path/to/specific.test.js  # Run single test
 ```
 
 ### Lint & Format
 
 ```bash
-npm run lint         # Check Prettier + ESLint
-npm run format       # Auto-format with Prettier
-npm run check        # Svelte type-checking
-npm run check:watch  # Type-checking in watch mode
+pnpm lint         # Check Prettier + ESLint
+pnpm format       # Auto-format with Prettier
+pnpm check        # Svelte type-checking
+pnpm check:watch  # Type-checking in watch mode
 ```
 
 ## Code Style

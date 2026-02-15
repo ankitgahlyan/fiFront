@@ -10,18 +10,12 @@
 	import { goto } from '$app/navigation';
 	import { Moon, Sun, LayoutGrid, House } from '@lucide/svelte';
 
-	let isDark = $state(false);
+	let isDark = $state(true);
 
 	onMount(async () => {
 		initTonConnect();
 
-		// Check system preference for dark mode
-		if (typeof window !== 'undefined') {
-			isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-			if (isDark) {
-				document.documentElement.classList.add('dark');
-			}
-		}
+		document.documentElement.classList.add('dark');
 	});
 
 	onDestroy(() => {});
@@ -38,7 +32,7 @@
 
 <div class="bg-background flex min-h-screen flex-col">
 	<header
-		class="border-border/40 bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur"
+		class="border-border/40 bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur"
 	>
 		<div class="container mx-auto flex h-16 items-center justify-between px-4">
 			<div class="flex items-center gap-2">
@@ -81,7 +75,7 @@
 						</span>
 					</div>
 				{/if}
-				
+
 				<div id="ton-connect-button"></div>
 			</div>
 		</div>
