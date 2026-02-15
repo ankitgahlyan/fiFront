@@ -60,7 +60,7 @@
 
 <div class="container mx-auto space-y-6 px-4 py-8">
 	<!-- Header Card -->
-	<Card class="from-primary/10 via-primary/5 to-background border-primary/20 bg-gradient-to-br">
+	<Card class="from-primary/10 via-primary/5 to-background border-primary/20 bg-linear-to-br">
 		<CardContent class="pt-6">
 			<div class="mb-6 flex items-center justify-between">
 				<div class="flex items-center gap-3">

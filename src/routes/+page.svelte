@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { getBalance, sendTransfer } from '$lib/stores/fi';
-	import { isConnected, userAddress } from '$lib/stores/tonconnect';
+	import { isConnected, userAddress, connectedWallets, activeWalletIndex } from '$lib/stores/tonconnect';
+	import WalletSelector from '$lib/components/WalletSelector.svelte';
 	// import type { FiJettonFullData } from '$lib/FossFiWallet';
 	// import Transfer from '$lib/components/fiJetton/Transfer.svelte';
 	import Button from '@/components/ui/button/button.svelte';
@@ -37,13 +38,17 @@
 		}
 		// loadState();
 		// getState();
+
+		// return () => {
+		// 	stopQRScanner();
+		// };
 	});
 
 	$effect(() => {
 		if (error) {
 			const timeout = setTimeout(() => {
 				error = '';
-			}, 2000);
+			}, 5000);
 			return () => clearTimeout(timeout);
 		}
 	});
@@ -62,7 +67,7 @@
 			const cameras = await Html5Qrcode.getCameras();
 			if (cameras && cameras.length > 0) {
 				await qrScanner.start(
-					cameras[0].id,
+					cameras.length > 1 ? cameras[1].id : cameras[0].id,
 					{
 						fps: 1000, // todo: max?
 						qrbox: { width: 250, height: 250 }
@@ -198,6 +203,9 @@
 		</div>
 	{/if}
 
+	<!-- Connected Wallets Selector -->
+	<WalletSelector />
+
 	<!-- Balance Card -->
 	{#if $userAddress}
 		<Card class="overflow-hidden">
@@ -221,20 +229,14 @@
 					<div class="text-center md:text-left">
 						<p class="text-muted-foreground mb-1 text-sm">Available Balance</p>
 						<p class="text-4xl font-bold tracking-tight">
-							<!-- {#if balance} -->
 							{balance} <span class="text-primary">MINT</span>
-							<!-- {:else if loading}
-								<span class="text-muted-foreground">Loading...</span>
-							{:else}
-								<span class="text-muted-foreground">0 MINT</span>
-							{/if} -->
-							<Button variant="outline" onclick={async () => (balance = await getBalance())}>
-								<ArrowRightLeft class="mr-2 h-4 w-4" />
-								Refresh
-							</Button>
 						</p>
 					</div>
 					<div class="flex gap-3">
+						<Button variant="outline" onclick={async () => (balance = await getBalance())}>
+							<ArrowRightLeft class="mr-2 h-4 w-4" />
+							Refresh
+						</Button>
 						<Button variant="outline" onclick={() => goto('/send')}>
 							<ArrowRightLeft class="mr-2 h-4 w-4" />
 							Send
