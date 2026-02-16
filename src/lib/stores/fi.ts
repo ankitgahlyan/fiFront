@@ -8,15 +8,6 @@ import { browser } from '$app/environment';
 import { get } from 'svelte/store';
 
 let fi: OpenedContract<FossFi> | null = null;
-let userAddr: Address;
-const unsub = userAddress.subscribe((addr) => {
-	if (addr) {
-		userAddr = addr;
-		console.log('User address updated:', addr);
-	} else {
-		console.log('User address is null');
-	}
-});
 
 async function getFi() {
 	if (!fi) {
@@ -48,6 +39,7 @@ export async function getFiJetton(ownerAddress: Address) {
 }
 
 export async function getBalance(): Promise<string> {
+	const userAddr = get(userAddress);
 	if (!userAddr) throw new Error('Wallet not connected');
 	let balance = fromNano((await (await getFiJetton(userAddr)).getGetWalletData()).balance);
 	localStorage.setItem('balance', balance);
@@ -85,14 +77,17 @@ export async function sendTransfer(
 ) {
 	try {
 		const tonConnectUI = getTonConnectUI();
-		const fiJettonAddr = await getJettonAddr(userAddr);
+		const fromAddress = get(userAddress);
+		if (!fromAddress) throw new Error('Wallet not connected');
+
+		const fiJettonAddr = await getJettonAddr(fromAddress);
 
 		const tb = beginCell()
 			.storeUint(0xf8a7ea5, 32)
 			.storeUint(0, 64) // op, queryId
 			.storeCoins(amount)
 			.storeAddress(toAddress)
-			.storeAddress(userAddr)
+			.storeAddress(fromAddress)
 			.storeMaybeRef(customPayload)
 			.storeCoins(toNano(1n))
 			.storeMaybeRef(beginCell().storeStringRefTail(forwardPayload))
