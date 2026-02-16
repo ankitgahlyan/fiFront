@@ -13,6 +13,7 @@ import { userAddress, getTonConnectUI } from './tonconnect';
 import { browser } from '$app/environment';
 import { ENDPOINT as TON_CLIENT_ENDPOINT } from '$lib/consts';
 import { getTonClient } from '$lib/utils/ton';
+import { setLotteryData, getLotteryData } from '$lib/utils/indexeddb';
 
 // Configuration
 const LOTTERY_ADDRESS = 'EQD...'; // Replace with actual contract address
@@ -91,14 +92,47 @@ export function clearSecretFromStorage() {
 	userSecret.set(null);
 }
 
-// Fetch lottery state
-export async function fetchLotteryState() {
+// Fetch lottery state with offline-first support
+export async function fetchLotteryState(useCache: boolean = true) {
 	try {
+		const addr = get(userAddress);
+		const cacheKey = addr ? `lottery-${addr.toString()}` : 'lottery-general';
+
+		if (useCache) {
+			const cachedData = await getLotteryData<{
+				phase: LotteryPhase;
+				participants: number;
+				commits: number;
+				reveals: number;
+				pool: bigint;
+				winnerAddr: Address | null;
+				deadlinesData: { commit: number; reveal: number };
+				participant: boolean;
+				committed: boolean;
+				revealed: boolean;
+			}>(cacheKey);
+
+			if (cachedData) {
+				lotteryPhase.set(cachedData.phase);
+				participantCount.set(cachedData.participants);
+				commitCount.set(cachedData.commits);
+				revealCount.set(cachedData.reveals);
+				prizePool.set(cachedData.pool);
+				winner.set(cachedData.winnerAddr);
+				deadlines.set(cachedData.deadlinesData);
+
+				if (addr) {
+					isParticipant.set(cachedData.participant);
+					hasCommitted.set(cachedData.committed);
+					hasRevealed.set(cachedData.revealed);
+				}
+			}
+		}
+
 		const client = getTonClient();
 		const contract = getLotteryContract();
 		const contractProvider = client.open(contract);
 
-		// Fetch contract state
 		const [phase, participants, commits, reveals, pool, winnerAddr, deadlinesData] =
 			await Promise.all([
 				contractProvider.getCurrentPhase(),
@@ -118,19 +152,39 @@ export async function fetchLotteryState() {
 		winner.set(winnerAddr);
 		deadlines.set(deadlinesData);
 
-		// Fetch user-specific state if connected
-		const addr = get(userAddress);
-		if (addr) {
-			const [participant, committed, revealed] = await Promise.all([
-				contractProvider.isParticipant(addr),
-				contractProvider.hasCommitted(addr),
-				contractProvider.hasRevealed(addr)
+		let participant = false;
+		let committed = false;
+		let revealed = false;
+
+		const userAddr = get(userAddress);
+		if (userAddr) {
+			[participant, committed, revealed] = await Promise.all([
+				contractProvider.isParticipant(userAddr),
+				contractProvider.hasCommitted(userAddr),
+				contractProvider.hasRevealed(userAddr)
 			]);
 
 			isParticipant.set(participant);
 			hasCommitted.set(committed);
 			hasRevealed.set(revealed);
 		}
+
+		await setLotteryData(
+			cacheKey,
+			{
+				phase,
+				participants,
+				commits,
+				reveals,
+				pool,
+				winnerAddr,
+				deadlinesData,
+				participant,
+				committed,
+				revealed
+			},
+			30000
+		);
 	} catch (error) {
 		console.error('Failed to fetch lottery state:', error);
 	}

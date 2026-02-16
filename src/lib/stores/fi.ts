@@ -8,6 +8,15 @@ import { browser } from '$app/environment';
 import { get } from 'svelte/store';
 
 let fi: OpenedContract<FossFi> | null = null;
+let userAddr: Address;
+const unsub = userAddress.subscribe((addr) => {
+	if (addr) {
+		userAddr = addr;
+		console.log('User address updated:', addr);
+	} else {
+		console.log('User address is null');
+	}
+});
 
 async function getFi() {
 	if (!fi) {
@@ -39,7 +48,6 @@ export async function getFiJetton(ownerAddress: Address) {
 }
 
 export async function getBalance(): Promise<string> {
-	const userAddr = get(userAddress);
 	if (!userAddr) throw new Error('Wallet not connected');
 	let balance = fromNano((await (await getFiJetton(userAddr)).getGetWalletData()).balance);
 	localStorage.setItem('balance', balance);
@@ -70,43 +78,28 @@ export async function getBalance(): Promise<string> {
 // }
 
 export async function sendTransfer(
-	fromAddress: Address,
-	toAddress: string,
-	amount: number,
+	toAddress: Address,
+	amount: bigint,
 	customPayload: Cell | null = null,
 	forwardPayload: string = ''
 ) {
 	try {
 		const tonConnectUI = getTonConnectUI();
-		const fiJettonAddr = await getJettonAddr(fromAddress);
-
-		const transfer = {
-			$$type: 'JettonTransfer',
-			queryId: 0n, // can be random or sequential
-			amount: toNano(amount),
-			destination: Address.parse(toAddress),
-			responseDestination: fromAddress,
-			customPayload: customPayload,
-			forwardTonAmount: toNano(1n),
-			forwardPayload: beginCell().storeStringRefTail(forwardPayload).endCell()
-		};
+		const fiJettonAddr = await getJettonAddr(userAddr);
 
 		const tb = beginCell()
 			.storeUint(0xf8a7ea5, 32)
 			.storeUint(0, 64) // op, queryId
-			.storeCoins(toNano(amount))
-			.storeAddress(Address.parse(toAddress))
-			.storeAddress(fromAddress)
+			.storeCoins(amount)
+			.storeAddress(toAddress)
+			.storeAddress(userAddr)
 			.storeMaybeRef(customPayload)
 			.storeCoins(toNano(1n))
 			.storeMaybeRef(beginCell().storeStringRefTail(forwardPayload))
 			.endCell();
 
-		// Build transfer body
-		// const tb = beginCell().store(storeJettonTransfer(transfer)).endCell();
-
 		const transaction = {
-			validUntil: Math.floor(Date.now() / 1000) + 600,
+			validUntil: Math.floor(Date.now()) + 600000, // valid for 10 minutes
 			messages: [
 				{
 					address: fiJettonAddr.toString(),

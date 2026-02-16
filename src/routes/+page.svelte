@@ -21,6 +21,7 @@
 	import { Input } from '@/components/ui/input';
 	import { Label } from '@/components/ui/label';
 	import { Send, QrCode, X } from '@lucide/svelte';
+	import { Address, toNano } from '@ton/core';
 
 	// let error: string | null = $state(null);
 	// let jettonStateFull: FiJettonFullData | null = $state(null);
@@ -124,18 +125,18 @@
 	}
 
 	async function handleSend() {
-		const amountNum = parseFloat(amount);
+		const amountNum = toNano(amount);
 		isSending = true;
 		error = '';
 
 		try {
-			if (!$userAddress) {
-				error = 'Connect your Wallet';
-				isSending = false;
-				return;
-			}
+			// if (!$userAddress) {
+			// 	error = 'Connect your Wallet';
+			// 	isSending = false;
+			// 	return;
+			// }
 
-			await sendTransfer($userAddress, recipient, amountNum);
+			await sendTransfer(Address.parse(recipient), amountNum);
 			recipient = '';
 			amount = '';
 		} catch (err: any) {

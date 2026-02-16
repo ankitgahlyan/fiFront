@@ -20,7 +20,7 @@
             "model": "anthropic/claude-haiku-4-5",
         },
         "component": {
-            "template": "Create a new React component named $ARGUMENTS with TypeScript support.\nInclude proper typing and basic structure.",
+            "template": "Create a new Sveltekit component named $ARGUMENTS with TypeScript support.\nInclude proper typing and basic structure.",
             "description": "Create a new component",
         },
     },
@@ -38,22 +38,22 @@
     "mcp": {
         "svelte": {
             "type": "local",
-            // Or ["bun", "x", "my-mcp-command"]
             "command": [
-                "npx",
-                "-y",
+                "bun",
+                "x",
                 "@sveltejs/mcp"
             ],
-            "enabled": true,
-            "environment": {
-                "MY_ENV_VAR": "my_env_var_value",
-            },
-            "timeout": 5000,
+            // "enabled": true,
+            // "environment": {
+            // "MY_ENV_VAR": "my_env_var_value",
+            // },
+            // "timeout": 10000,
         },
         "context7": {
             "type": "local",
             "command": [
-                "npx",
+                "bun",
+                "x",
                 "@upstash/context7-mcp@1.0.31"
             ],
             "environment": {

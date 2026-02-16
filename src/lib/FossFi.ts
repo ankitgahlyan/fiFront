@@ -140,7 +140,7 @@ export function storeInternalTransferStep(src: InternalTransferStep) {
 }
 
 export class FossFi implements Contract {
-	readonly abi: ContractABI = { name: 'FossFi' }; // todo: implement from shard wrapper
+	readonly abi: ContractABI = { name: 'FossFi' }; // todo: implement
 
 	constructor(
 		readonly address: Address,

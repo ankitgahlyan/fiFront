@@ -4,6 +4,7 @@ import { writable, derived, type Readable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { encrypt, decrypt, generateMnemonic } from '../utils/crypto';
 import { saveToVault, getFromVault } from '../utils/vault';
+import { setWalletData, getWalletData } from '../utils/indexeddb';
 import {
 	walletFromMnemonic,
 	getBalance,
@@ -21,6 +22,7 @@ interface Wallet {
 	mnemonic: string;
 	balance: number;
 	jettons: Jetton[];
+	lastUpdated?: number;
 }
 
 interface WalletStoreData {
@@ -264,46 +266,67 @@ function createWalletStore() {
 		/**
 		 * Refresh balances
 		 */
-		async refreshBalances(pin: string): Promise<Result> {
+		async refreshBalances(pin: string, useCache: boolean = true): Promise<Result> {
 			if (!browser) return { success: false };
 
-			try {
-				let currentState: WalletStoreData | undefined;
-				const unsubscribe = subscribe((state) => (currentState = state));
-				unsubscribe();
+			let currentState: WalletStoreData | undefined;
+			const unsubscribe = subscribe((state) => (currentState = state));
+			unsubscribe();
 
-				if (!currentState) {
-					return { success: false, error: 'Unable to get current state' };
+			if (!currentState) {
+				return { success: false, error: 'Unable to get current state' };
+			}
+
+			const { wallets, activeWalletIndex } = currentState;
+			const activeWallet = wallets[activeWalletIndex];
+
+			if (!activeWallet) return { success: false, error: 'No active wallet' };
+
+			if (useCache) {
+				const cachedData = await getWalletData(activeWallet.address);
+				if (cachedData) {
+					update((state) => {
+						const updatedWallets = [...state.wallets];
+						updatedWallets[activeWalletIndex] = {
+							...updatedWallets[activeWalletIndex],
+							balance: cachedData.balance,
+							jettons: cachedData.jettons,
+							lastUpdated: cachedData.lastUpdated
+						};
+						return {
+							...state,
+							wallets: updatedWallets,
+							transactions: cachedData.transactions
+						};
+					});
 				}
+			}
 
-				const { wallets, activeWalletIndex } = currentState;
-				const activeWallet = wallets[activeWalletIndex];
-
-				if (!activeWallet) return { success: false, error: 'No active wallet' };
-
-				// Get TON balance
+			try {
 				const balance = await getBalance(activeWallet.address);
 
-				// Get jetton balances
 				const jettonBalances = await Promise.all(
 					POPULAR_JETTONS.map(async (jetton: Jetton) => {
 						const jettonBalance = await getJettonBalance(
 							activeWallet.address,
-							jetton.masterAddress,
+							jetton.masterAddress
 						);
 						return { ...jetton, balance: jettonBalance };
 					})
 				);
 
-				// Get transactions
 				const transactions = await getTransactions(activeWallet.address);
+
+				const now = Date.now();
+				await setWalletData(activeWallet.address, balance, jettonBalances, transactions, now);
 
 				update((state) => {
 					const updatedWallets = [...state.wallets];
 					updatedWallets[activeWalletIndex] = {
 						...updatedWallets[activeWalletIndex],
 						balance,
-						jettons: jettonBalances
+						jettons: jettonBalances,
+						lastUpdated: now
 					};
 					return {
 						...state,
@@ -325,7 +348,46 @@ function createWalletStore() {
 				return { success: true };
 			} catch (error) {
 				console.error('Error refreshing balances:', error);
+				if (useCache) {
+					return { success: true };
+				}
 				return { success: false, error: String(error) };
+			}
+		},
+
+		/**
+		 * Load cached wallet data from IndexedDB
+		 */
+		async loadCachedData(): Promise<void> {
+			if (!browser) return;
+
+			let currentState: WalletStoreData | undefined;
+			const unsubscribe = subscribe((state) => (currentState = state));
+			unsubscribe();
+
+			if (!currentState) return;
+
+			const { wallets, activeWalletIndex } = currentState;
+			const activeWallet = wallets[activeWalletIndex];
+
+			if (!activeWallet) return;
+
+			const cachedData = await getWalletData(activeWallet.address);
+			if (cachedData) {
+				update((state) => {
+					const updatedWallets = [...state.wallets];
+					updatedWallets[activeWalletIndex] = {
+						...updatedWallets[activeWalletIndex],
+						balance: cachedData.balance,
+						jettons: cachedData.jettons,
+						lastUpdated: cachedData.lastUpdated
+					};
+					return {
+						...state,
+						wallets: updatedWallets,
+						transactions: cachedData.transactions
+					};
+				});
 			}
 		}
 	};
