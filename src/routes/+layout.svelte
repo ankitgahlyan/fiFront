@@ -14,7 +14,8 @@
 
 	onMount(async () => {
 		initTonConnect();
-
+		// fetch fiJettonAddress
+		
 		document.documentElement.classList.add('dark');
 	});
 
@@ -38,7 +39,7 @@
 			<div class="flex items-center gap-2">
 				<a href="/" class="flex items-center gap-2">
 					<div
-						class="from-primary to-primary/70 flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br"
+						class="from-primary to-primary/70 flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br"
 					>
 						<span class="text-primary-foreground text-lg font-bold">F</span>
 					</div>

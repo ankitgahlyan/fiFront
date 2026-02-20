@@ -6,25 +6,20 @@
 	import { Label } from '@/components/ui/label';
 	import { Card, CardContent } from '@/components/ui/card';
 	import { Send, AlertCircle } from '@lucide/svelte';
-
+	import { Address, toNano } from '@ton/core';
+	
 	let recipient = $state('');
 	let amount = $state('');
 	let isSending = $state(false);
 	let error = $state('');
 
 	async function handleSend() {
-		const amountNum = parseFloat(amount);
+		const amountNum = toNano(amount);
 		isSending = true;
 		error = '';
 
 		try {
-			if (!$userAddress) {
-				error = 'Connect your Wallet';
-				isSending = false;
-				return;
-			}
-
-			await sendTransfer($userAddress, recipient, amountNum);
+			await sendTransfer(Address.parse(recipient), amountNum);
 			recipient = '';
 			amount = '';
 		} catch (err: any) {

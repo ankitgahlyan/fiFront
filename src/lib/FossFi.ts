@@ -22,17 +22,18 @@ export type FossFiContent = {
 };
 
 export type FossFiConfig = {
-	admin_address: Address | null;
+	admin_address: Address;
 	base_fi_wallet_code: Cell;
 	metadata_uri: Cell | FossFiContent;
 };
 export type FossFiConfigFull = {
-	supply: bigint;
-	admin: Address | null;
-	transfer_admin: Address | null;
-	wallet_code: Cell;
-	metadata_uri: Cell | FossFiContent;
-};
+    supply: bigint,
+    walletVersion: bigint,
+    admin: Address | null,
+    base_fi_wallet_code: Cell,
+    latest_fi_wallet_code: Cell,
+    metadata_uri: Cell | FossFiContent
+}
 
 export function endParse(slice: Slice) {
 	if (slice.remainingBits > 0 || slice.remainingRefs > 0) {
@@ -41,34 +42,29 @@ export function endParse(slice: Slice) {
 }
 
 export function fossFiConfigCellToConfig(config: Cell): FossFiConfigFull {
-	const sc = config.beginParse();
-	const parsed: FossFiConfigFull = {
-		supply: sc.loadCoins(),
-		admin: sc.loadMaybeAddress(),
-		transfer_admin: sc.loadMaybeAddress(),
-		wallet_code: sc.loadRef(),
-		metadata_uri: sc.loadRef()
-	};
-	endParse(sc);
-	return parsed;
-}
-
-export function parseFossFiData(data: Cell): FossFiConfigFull {
-	return fossFiConfigCellToConfig(data);
+    const sc = config.beginParse()
+    const parsed: FossFiConfigFull = {
+        supply: sc.loadCoins(),
+        walletVersion: sc.loadUintBig(10),
+        admin: sc.loadMaybeAddress(),
+        base_fi_wallet_code: sc.loadRef(),
+        latest_fi_wallet_code: sc.loadRef(),
+        metadata_uri: sc.loadRef()
+    };
+    endParse(sc);
+    return parsed;
 }
 
 export function fossFiConfigFullToCell(config: FossFiConfigFull): Cell {
-	const content =
-		config.metadata_uri instanceof Cell
-			? config.metadata_uri
-			: jettonContentToCell(config.metadata_uri);
-	return beginCell()
-		.storeCoins(config.supply)
-		.storeAddress(config.admin)
-		.storeAddress(config.transfer_admin)
-		.storeRef(config.wallet_code)
-		.storeRef(content)
-		.endCell();
+    const content = config.metadata_uri instanceof Cell ? config.metadata_uri : jettonContentToCell(config.metadata_uri);
+    return beginCell()
+        .storeCoins(config.supply)
+        .storeUint(config.walletVersion, 10)
+        .storeAddress(config.admin)
+        .storeRef(config.base_fi_wallet_code)
+        .storeRef(config.latest_fi_wallet_code)
+        .storeRef(content)
+        .endCell()
 }
 
 export function fossFiConfigToCell(config: FossFiConfig): Cell {

@@ -130,12 +130,6 @@
 		error = '';
 
 		try {
-			// if (!$userAddress) {
-			// 	error = 'Connect your Wallet';
-			// 	isSending = false;
-			// 	return;
-			// }
-
 			await sendTransfer(Address.parse(recipient), amountNum);
 			recipient = '';
 			amount = '';

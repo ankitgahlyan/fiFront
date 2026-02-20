@@ -1,6 +1,6 @@
 import { FI_ADDRESS } from '$lib/consts';
 import { getTonClient } from '$lib/utils/ton';
-import { Address, beginCell, Cell, fromNano, toNano, type OpenedContract } from '@ton/core';
+import { Address, beginCell, Cell, comment, fromNano, toNano, type OpenedContract } from '@ton/core';
 import { getTonConnectUI, userAddress } from './tonconnect';
 import { FossFi } from '$lib/FossFi';
 import { FossFiWallet } from '$lib/FossFiWallet';
@@ -9,7 +9,7 @@ import { get } from 'svelte/store';
 
 let fi: OpenedContract<FossFi> | null = null;
 
-async function getFi() {
+function getFi() {
 	if (!fi) {
 		fi = getTonClient().open(FossFi.createFromAddress(Address.parse(FI_ADDRESS)));
 	}
@@ -24,7 +24,7 @@ export async function getJettonAddr(ownerAddress: Address) {
 		return Address.parse(stored);
 	}
 
-	const jettonAddr = (await getFi()).getWalletAddress(ownerAddress);
+	const jettonAddr = await (getFi()).getWalletAddress(ownerAddress);
 	if (!jettonAddr) {
 		throw new Error('FiJetton wallet not found');
 	}
@@ -90,7 +90,8 @@ export async function sendTransfer(
 			.storeAddress(fromAddress)
 			.storeMaybeRef(customPayload)
 			.storeCoins(toNano(1n))
-			.storeMaybeRef(beginCell().storeStringRefTail(forwardPayload))
+			.storeMaybeRef(comment(forwardPayload))
+			// .storeMaybeRef(beginCell().storeStringRefTail(forwardPayload))
 			.endCell();
 
 		const transaction = {
