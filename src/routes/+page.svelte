@@ -17,11 +17,11 @@
 	import { Separator } from '@/components/ui/separator';
 	import { Wallet, Coins, ArrowRightLeft, Sparkles, Shield, Zap } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
-	import { Html5Qrcode } from 'html5-qrcode';
 	import { Input } from '@/components/ui/input';
 	import { Label } from '@/components/ui/label';
 	import { Send, QrCode, X } from '@lucide/svelte';
 	import { Address, toNano } from '@ton/core';
+	import QrScanner from '@/components/common/QrScanner.svelte';
 
 	// let error: string | null = $state(null);
 	// let jettonStateFull: FiJettonFullData | null = $state(null);
@@ -32,9 +32,6 @@
 	let selectedAsset = $state('MINT');
 	let isSending = $state(false);
 	let error = $state('');
-	let showQRScanner = $state(false);
-	let qrScanner: Html5Qrcode | null = null;
-	let qrScannerReady = $state(false);
 
 	onMount(async () => {
 		const stored = localStorage.getItem('balance');
@@ -50,9 +47,15 @@
 
 	$effect(() => {
 		if ($userAddress) {
+			let isMounted = true;
 			getBalance()
-				.then((b) => (balance = b))
+				.then((b) => {
+					if (isMounted) balance = b;
+				})
 				.catch(() => {});
+			return () => {
+				isMounted = false;
+			};
 		}
 	});
 
@@ -64,65 +67,6 @@
 			return () => clearTimeout(timeout);
 		}
 	});
-
-	async function initializeQRScanner() {
-		// Show the scanner UI first to render the element
-		showQRScanner = true;
-		// Wait for DOM to update
-		await tick();
-
-		if (!qrScanner) {
-			qrScanner = new Html5Qrcode('qr-reader');
-		}
-
-		try {
-			const cameras = await Html5Qrcode.getCameras();
-			if (cameras && cameras.length > 0) {
-				await qrScanner.start(
-					cameras.length > 1 ? cameras[1].id : cameras[0].id,
-					{
-						fps: 1000, // todo: max?
-						qrbox: { width: 250, height: 250 }
-					},
-					onScanSuccess,
-					onScanError
-				);
-				qrScannerReady = true;
-			}
-		} catch (err: any) {
-			error = 'Failed to initialize camera for QR scanning';
-			console.error('QR Scanner initialization failed:', err);
-			showQRScanner = false;
-		}
-	}
-
-	function onScanSuccess(qrCodeMessage: string) {
-		let address = qrCodeMessage.trim();
-
-		// Extract address from ton://transfer/ prefix if present
-		const tonTransferMatch = address.match(/ton:\/\/transfer\/(.+)/);
-		if (tonTransferMatch) {
-			address = tonTransferMatch[1];
-		}
-
-		recipient = address;
-		stopQRScanner();
-	}
-
-	function onScanError(error: string) {
-		// Silently ignore QR scanning errors (continuous scanning attempts)
-	}
-
-	async function stopQRScanner() {
-		if (qrScanner && showQRScanner) {
-			try {
-				await qrScanner.stop();
-				showQRScanner = false;
-			} catch (err: any) {
-				console.error('Error stopping QR scanner:', err);
-			}
-		}
-	}
 
 	async function handleSend() {
 		const amountNum = toNano(amount);
@@ -297,15 +241,7 @@
 					<div class="space-y-2">
 						<div class="flex items-center justify-between">
 							<Label for="recipient">Recipient Address</Label>
-							<Button
-								variant="ghost"
-								size="sm"
-								onclick={initializeQRScanner}
-								class="h-auto p-1"
-								title="Scan QR code"
-							>
-								<QrCode class="h-4 w-4" />
-							</Button>
+							<QrScanner />
 						</div>
 						<Input
 							id="recipient"
@@ -373,7 +309,6 @@
 						Connect your TON wallet to view your balance and make transfers.
 					</p>
 					<p class="text-muted-foreground text-sm">Use the connect button in the header above</p>
-					<div id="ton-connect-button"></div>
 				</CardContent>
 			</Card>
 		{/if}
@@ -397,27 +332,6 @@
 					</CardContent>
 				</Card>
 			{/each}
-		</div>
-	{/if}
-
-	<!-- QR Scanner Overlay -->
-	{#if showQRScanner}
-		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-			<div class="relative w-full max-w-sm">
-				<div class="space-y-4">
-					<div class="flex items-center justify-between">
-						<h3 class="text-lg font-semibold text-white">Scan QR Code</h3>
-						<Button variant="ghost" size="sm" onclick={stopQRScanner} class="h-auto p-1">
-							<X class="h-5 w-5" />
-						</Button>
-					</div>
-					<div id="qr-reader" class="w-full rounded-lg"></div>
-					{#if !qrScannerReady}
-						<p class="text-center text-sm text-gray-300">Initializing camera...</p>
-					{/if}
-					<p class="text-center text-xs text-gray-400">Position QR code in the frame</p>
-				</div>
-			</div>
 		</div>
 	{/if}
 </div>

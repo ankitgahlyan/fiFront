@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { goto } from "$app/navigation";
-	import { Button } from "@/components/ui/button";
-	import { ArrowLeft } from "@lucide/svelte";
+	import { goto } from '$app/navigation';
+	import { Button } from '@/components/ui/button';
+	import { ArrowLeft } from '@lucide/svelte';
 
 	// let availableAssets = $derived([
 	// 	{ symbol: 'TON', balance: $userAddress?.balance || 0 },
@@ -81,6 +81,4 @@
 		<ArrowLeft class="mr-2 h-4 w-4" />
 		Back to Dashboard
 	</Button>
-
-	
 </div>

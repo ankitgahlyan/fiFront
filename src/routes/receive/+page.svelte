@@ -5,7 +5,16 @@
 	import Button from '@/components/ui/button/button.svelte';
 	import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 	import { Badge } from '@/components/ui/badge';
-	import { ArrowLeft, Copy, Check, Wallet, AlertTriangle, AlertTriangleIcon, AlertOctagon, AlertCircle } from '@lucide/svelte';
+	import {
+		ArrowLeft,
+		Copy,
+		Check,
+		Wallet,
+		AlertTriangle,
+		AlertTriangleIcon,
+		AlertOctagon,
+		AlertCircle
+	} from '@lucide/svelte';
 	import Label from '@/components/ui/label/label.svelte';
 	import { userAddress } from '@/stores/tonconnect';
 
@@ -18,9 +27,9 @@
 	});
 
 	function copyAddress() {
-			navigator.clipboard.writeText($userAddress!.toString());
-			copied = true;
-			setTimeout(() => (copied = false), 2000);
+		navigator.clipboard.writeText($userAddress!.toString());
+		copied = true;
+		setTimeout(() => (copied = false), 2000);
 	}
 
 	function generateQR(address: string): string {
@@ -57,9 +66,7 @@
 					<div class="border-border rounded-xl border-2 bg-white p-4">
 						<img src={generateQR($userAddress.toString())} alt="QR Code" class="h-48 w-48" />
 					</div>
-					<p class="text-muted-foreground mt-4 text-center text-sm">
-						gimme gimme fundssshhh...
-					</p>
+					<p class="text-muted-foreground mt-4 text-center text-sm">gimme gimme fundssshhh...</p>
 				</div>
 
 				<!-- Address -->

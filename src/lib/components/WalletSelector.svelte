@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { connectedWallets, activeWalletIndex, switchConnectedWallet, disconnectWallet } from '$lib/stores/tonconnect';
+	import {
+		connectedWallets,
+		activeWalletIndex,
+		switchConnectedWallet,
+		disconnectWallet
+	} from '$lib/stores/tonconnect';
 	import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 	import Button from '@/components/ui/button/button.svelte';
 	import { Badge } from '@/components/ui/badge';
@@ -42,7 +47,7 @@
 		<CardContent class="space-y-2">
 			{#each $connectedWallets as walletInfo, index}
 				<div
-					class="group flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-all hover:bg-muted/50"
+					class="group hover:bg-muted/50 flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-all"
 					class:bg-primary={index === $activeWalletIndex}
 					class:border-primary={index === $activeWalletIndex}
 				>
@@ -53,12 +58,17 @@
 					>
 						<div class="flex items-center gap-3">
 							<span class="text-xl">{getWalletIcon()}</span>
-							<div class="flex-1 min-w-0">
+							<div class="min-w-0 flex-1">
 								<!-- <p class="text-sm font-medium truncate">
 									{walletInfo.account.address || 'Unknown Wallet'}
 								</p> -->
-								<p class="text-xs text-muted-foreground font-mono">
-									{truncateAddress(Address.parse(walletInfo.account.address).toString({testOnly: true, bounceable: false})) || ''}
+								<p class="text-muted-foreground font-mono text-xs">
+									{truncateAddress(
+										Address.parse(walletInfo.account.address).toString({
+											testOnly: true,
+											bounceable: false
+										})
+									) || ''}
 								</p>
 							</div>
 						</div>

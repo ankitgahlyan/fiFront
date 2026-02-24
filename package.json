@@ -17,6 +17,7 @@
 		"test:e2e": "playwright test"
 	},
 	"dependencies": {
+		"@aws-crypto/sha256-js": "^5.2.0",
 		"@internationalized/date": "^3.11.0",
 		"@lucide/svelte": "^0.564.0",
 		"@simplewebauthn/browser": "13.2.2",

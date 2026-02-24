@@ -2,20 +2,22 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	let { children } = $props();
-
 	import { onMount, onDestroy } from 'svelte';
 	import { initTonConnect, isConnected, wallet } from '$lib/stores/tonconnect';
 	import '../app.css';
 	import Button from '@/components/ui/button/button.svelte';
 	import { goto } from '$app/navigation';
 	import { Moon, Sun, LayoutGrid, House } from '@lucide/svelte';
+	import { browser } from '$app/environment';
+	import { tonStore } from '@/deployer/tonstore.svelte';
 
 	let isDark = $state(true);
 
 	onMount(async () => {
-		initTonConnect();
+		// initTonConnect();
 		// fetch fiJettonAddress
-		
+		if (!browser) return;
+		await tonStore.init();
 		document.documentElement.classList.add('dark');
 	});
 
@@ -52,7 +54,7 @@
 					<House class="h-5 w-5" />
 				</Button>
 
-				<Button variant="ghost" size="icon" onclick={() => goto('/skeletonui')} title="Dashboard">
+				<Button variant="ghost" size="icon" onclick={() => goto('/deployer')} title="Dashboard">
 					<LayoutGrid class="h-5 w-5" />
 				</Button>
 
@@ -99,12 +101,12 @@
 						rel="noopener noreferrer"
 						class="hover:text-foreground transition-colors">GitHub</a
 					>
-					<a
+					<!-- <a
 						href="https://docs.ton.org"
 						target="_blank"
 						rel="noopener noreferrer"
 						class="hover:text-foreground transition-colors">Docs</a
-					>
+					> -->
 					<a
 						href="https://t.me/fossfi"
 						target="_blank"

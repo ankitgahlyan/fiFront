@@ -7,7 +7,7 @@
 	import { Card, CardContent } from '@/components/ui/card';
 	import { Send, AlertCircle } from '@lucide/svelte';
 	import { Address, toNano } from '@ton/core';
-	
+
 	let recipient = $state('');
 	let amount = $state('');
 	let isSending = $state(false);

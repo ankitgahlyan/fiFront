@@ -1,6 +1,14 @@
 import { FI_ADDRESS } from '$lib/consts';
 import { getTonClient } from '$lib/utils/ton';
-import { Address, beginCell, Cell, comment, fromNano, toNano, type OpenedContract } from '@ton/core';
+import {
+	Address,
+	beginCell,
+	Cell,
+	comment,
+	fromNano,
+	toNano,
+	type OpenedContract
+} from '@ton/core';
 import { getTonConnectUI, userAddress } from './tonconnect';
 import { FossFi } from '$lib/FossFi';
 import { FossFiWallet } from '$lib/FossFiWallet';
@@ -24,7 +32,7 @@ export async function getJettonAddr(ownerAddress: Address) {
 		return Address.parse(stored);
 	}
 
-	const jettonAddr = await (getFi()).getWalletAddress(ownerAddress);
+	const jettonAddr = await getFi().getWalletAddress(ownerAddress);
 	if (!jettonAddr) {
 		throw new Error('FiJetton wallet not found');
 	}
@@ -73,7 +81,7 @@ export async function sendTransfer(
 	toAddress: Address,
 	amount: bigint,
 	customPayload: Cell | null = null,
-	forwardPayload: string = ''
+	forwardPayload: string = 'hiThere'
 ) {
 	try {
 		const tonConnectUI = getTonConnectUI();

@@ -55,7 +55,10 @@ export function getTonClient(): TonClient {
 /**
  * Create wallet from mnemonic
  */
-export async function walletFromMnemonic(mnemonic: string, isTestnet: boolean = true): Promise<WalletData> {
+export async function walletFromMnemonic(
+	mnemonic: string,
+	isTestnet: boolean = true
+): Promise<WalletData> {
 	const mnemonicArray = mnemonic.trim().split(' ');
 	const keyPair = await mnemonicToPrivateKey(mnemonicArray);
 
@@ -91,7 +94,7 @@ export async function getBalance(address: string): Promise<number> {
 export async function sendTon(
 	fromMnemonic: string,
 	toAddress: string,
-	amount: number,
+	amount: number
 ): Promise<SendResult> {
 	try {
 		const mnemonicArray = fromMnemonic.trim().split(' ');
