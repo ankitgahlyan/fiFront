@@ -9,7 +9,7 @@ import {
 	secretToHex,
 	hexToSecret
 } from '../lottery-contract';
-import { userAddress, getTonConnectUI } from './tonconnect.svelte';
+import { getUserAddress, getTonConnectUI } from './tonconnect.svelte';
 import { browser } from '$app/environment';
 import { ENDPOINT as TON_CLIENT_ENDPOINT } from '$lib/consts';
 import { getTonClient } from '$lib/utils/ton';
@@ -17,6 +17,7 @@ import { setLotteryData, getLotteryData } from '$lib/utils/indexeddb';
 
 // Configuration
 const LOTTERY_ADDRESS = 'EQD...'; // Replace with actual contract address
+let userAddress = getUserAddress();
 
 // Lottery state
 export const lotteryPhase = writable<LotteryPhase>(LotteryPhase.Entry);
@@ -95,7 +96,7 @@ export function clearSecretFromStorage() {
 // Fetch lottery state with offline-first support
 export async function fetchLotteryState(useCache: boolean = true) {
 	try {
-		const addr = get(userAddress);
+		const addr = getUserAddress();
 		const cacheKey = addr ? `lottery-${addr.toString()}` : 'lottery-general';
 
 		if (useCache) {
@@ -156,7 +157,7 @@ export async function fetchLotteryState(useCache: boolean = true) {
 		let committed = false;
 		let revealed = false;
 
-		const userAddr = get(userAddress);
+		const userAddr = getUserAddress();
 		if (userAddr) {
 			[participant, committed, revealed] = await Promise.all([
 				contractProvider.isParticipant(userAddr),
@@ -227,7 +228,7 @@ export async function submitCommitment() {
 		// Save secret locally
 		saveSecretToStorage(secretHex);
 
-		const addr = get(userAddress);
+		const addr = getUserAddress();
 		if (!addr) throw new Error('Wallet not connected');
 
 		// Create commitment hash

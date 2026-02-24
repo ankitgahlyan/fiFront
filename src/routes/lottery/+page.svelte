@@ -23,7 +23,7 @@
 		claimPrize,
 		fetchLotteryState
 	} from '$lib/stores/lottery';
-	import { isConnected } from '$lib/stores/tonconnect.svelte';
+	import { getIsConnected } from '$lib/stores/tonconnect.svelte';
 	// const { isConnected } = await import('$lib/stores/tonconnect');
 	import { LotteryPhase } from '$lib/lottery-contract';
 	import { fromNano } from '@ton/core';
@@ -157,7 +157,7 @@
 
 	<!-- Main Action Area -->
 	<div class="action-area">
-		{#if !isConnected}
+		{#if !getIsConnected}
 			<!-- Not Connected -->
 			<div class="info-card glass-card">
 				<h3>Connect Your Wallet</h3>
