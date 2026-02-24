@@ -23,7 +23,7 @@
 		claimPrize,
 		fetchLotteryState
 	} from '$lib/stores/lottery';
-	import { isConnected } from '$lib/stores/tonconnect';
+	import { isConnected } from '$lib/stores/tonconnect.svelte';
 	// const { isConnected } = await import('$lib/stores/tonconnect');
 	import { LotteryPhase } from '$lib/lottery-contract';
 	import { fromNano } from '@ton/core';
@@ -157,7 +157,7 @@
 
 	<!-- Main Action Area -->
 	<div class="action-area">
-		{#if !$isConnected}
+		{#if !isConnected}
 			<!-- Not Connected -->
 			<div class="info-card glass-card">
 				<h3>Connect Your Wallet</h3>
@@ -282,7 +282,7 @@
 						<div class="winner-address">{$winner.toString()}</div>
 					</div>
 
-					{#if $isWinner}
+					{#if isWinner}
 						<div class="winner-celebration">
 							<h2 class="neon-text" style="color: var(--neon-gold);">🎊 CONGRATULATIONS! 🎊</h2>
 							<p>You won the lottery!</p>

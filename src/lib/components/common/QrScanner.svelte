@@ -4,34 +4,35 @@
 	import { QrCode, X } from '@lucide/svelte';
 	import { tick } from 'svelte';
 
+	// Props for the QR scanner component
+	let { value = $bindable() } = $props();
+
 	let showQRScanner = $state(false);
 	let qrScanner: Html5Qrcode | null = null;
-	let qrScannerReady = $state(false);
+	// let qrScannerReady = $state(false);
+	let error = $state('');
 
 	async function initializeQRScanner() {
 		// Show the scanner UI first to render the element
 		showQRScanner = true;
 		// Wait for DOM to update
-		await tick();
+		// await tick();
 
+		const cameras = await Html5Qrcode.getCameras();
 		if (!qrScanner) {
 			qrScanner = new Html5Qrcode('qr-reader');
 		}
 
 		try {
-			const cameras = await Html5Qrcode.getCameras();
-			if (cameras && cameras.length > 0) {
-				await qrScanner.start(
-					cameras.length > 1 ? cameras[1].id : cameras[0].id,
-					undefined,
-					onScanSuccess,
-					() => {} // onScanError: Silently ignore QR scanning errors (continuous scanning attempts)
-				);
-				qrScannerReady = true;
-			}
+			await qrScanner.start(
+				cameras.length > 1 ? cameras[1].id : cameras[0].id,
+				undefined,
+				onScanSuccess,
+				() => {} // onScanError: Silently ignore QR scanning errors (continuous scanning attempts)
+			);
 		} catch (err: any) {
-			// error = 'Failed to initialize camera for QR scanning';
-            console.error('QR Scanner initialization failed:', err);
+			error = 'Failed to initialize camera for QR scanning';
+			console.error('QR Scanner initialization failed:', err);
 			showQRScanner = false;
 		}
 	}
@@ -45,20 +46,20 @@
 			address = tonTransferMatch[1];
 		}
 
-		// recipient = address;
+		// Update the bound value
+		value = address;
 		stopQRScanner();
-        return address; // todo: fixme
 	}
 
 	async function stopQRScanner() {
-		if (qrScanner && showQRScanner) {
-			try {
-				await qrScanner.stop();
-				showQRScanner = false;
-			} catch (err: any) {
-				console.error('Error stopping QR scanner:', err);
-			}
-		}
+		// if (qrScanner && showQRScanner) {
+		// try {
+		showQRScanner = false;
+		await qrScanner!.stop();
+		// } catch (err: any) {
+		// console.error('Error stopping QR scanner:', err);
+		// }
+		// }
 	}
 </script>
 
@@ -84,10 +85,10 @@
 					</Button>
 				</div>
 				<div id="qr-reader" class="w-full rounded-lg"></div>
-				{#if !qrScannerReady}
+				<!-- {#if !qrScannerReady}
 					<p class="text-center text-sm text-gray-300">Initializing camera...</p>
-				{/if}
-				<p class="text-center text-xs text-gray-400">Position QR code in the frame</p>
+				{/if} -->
+				<!-- <p class="text-center text-xs text-gray-400">Position QR code in the frame</p> -->
 			</div>
 		</div>
 	</div>

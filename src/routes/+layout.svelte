@@ -3,7 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	let { children } = $props();
 	import { onMount, onDestroy } from 'svelte';
-	import { initTonConnect, isConnected, wallet } from '$lib/stores/tonconnect';
+	import { initTonConnect, getIsConnected, getWallet } from '@/stores/tonconnect.svelte';
 	import '../app.css';
 	import Button from '@/components/ui/button/button.svelte';
 	import { goto } from '$app/navigation';
@@ -14,16 +14,16 @@
 	let isDark = $state(true);
 
 	onMount(async () => {
-		// initTonConnect();
-		// fetch fiJettonAddress
 		if (!browser) return;
-		await tonStore.init();
+		initTonConnect();
+		// fetch fiJettonAddress
+		// await tonStore.init();
 		document.documentElement.classList.add('dark');
 	});
 
-	onDestroy(() => {});
+	// onDestroy(() => {});
 
-	$effect(() => {});
+	// $effect(() => {});
 
 	function toggleDarkMode() {
 		isDark = !isDark;
@@ -66,7 +66,7 @@
 					{/if}
 				</Button>
 
-				{#if $isConnected && $wallet}
+				<!-- {#if getIsConnected()}
 					<div
 						class="bg-primary/10 border-primary/20 hidden items-center gap-2 rounded-full border px-3 py-1.5 md:flex"
 					>
@@ -77,7 +77,7 @@
 							<span class="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
 						</span>
 					</div>
-				{/if}
+				{/if} -->
 
 				<div id="ton-connect-button"></div>
 			</div>
@@ -88,7 +88,7 @@
 		{@render children()}
 	</main>
 
-	<footer class="border-border/40 bg-muted/50 border-t py-6">
+	<!-- <footer class="border-border/40 bg-muted/50 border-t py-6">
 		<div class="container mx-auto px-4">
 			<div
 				class="text-muted-foreground flex flex-col items-center justify-between gap-4 text-sm sm:flex-row"
@@ -101,12 +101,12 @@
 						rel="noopener noreferrer"
 						class="hover:text-foreground transition-colors">GitHub</a
 					>
-					<!-- <a
+					<a
 						href="https://docs.ton.org"
 						target="_blank"
 						rel="noopener noreferrer"
 						class="hover:text-foreground transition-colors">Docs</a
-					> -->
+					>
 					<a
 						href="https://t.me/fossfi"
 						target="_blank"
@@ -116,5 +116,5 @@
 				</div>
 			</div>
 		</div>
-	</footer>
+	</footer> -->
 </div>

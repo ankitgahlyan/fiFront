@@ -9,7 +9,7 @@ import {
 	secretToHex,
 	hexToSecret
 } from '../lottery-contract';
-import { userAddress, getTonConnectUI } from './tonconnect';
+import { userAddress, getTonConnectUI } from './tonconnect.svelte';
 import { browser } from '$app/environment';
 import { ENDPOINT as TON_CLIENT_ENDPOINT } from '$lib/consts';
 import { getTonClient } from '$lib/utils/ton';

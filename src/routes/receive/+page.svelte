@@ -16,9 +16,10 @@
 		AlertCircle
 	} from '@lucide/svelte';
 	import Label from '@/components/ui/label/label.svelte';
-	import { userAddress } from '@/stores/tonconnect';
+	import { getUserAddress } from '@/stores/tonconnect.svelte';
 
 	let copied = $state(false);
+	let userAddress = getUserAddress(); 
 
 	onMount(() => {
 		// if (!$activeWallet) {
@@ -27,7 +28,7 @@
 	});
 
 	function copyAddress() {
-		navigator.clipboard.writeText($userAddress!.toString());
+		navigator.clipboard.writeText(userAddress!.toString());
 		copied = true;
 		setTimeout(() => (copied = false), 2000);
 	}
@@ -47,7 +48,7 @@
 		Back to Dashboard
 	</Button>
 
-	{#if $userAddress}
+	{#if userAddress}
 		<Card>
 			<CardHeader>
 				<div class="flex items-center gap-3">
@@ -64,7 +65,7 @@
 				<!-- QR Code -->
 				<div class="flex flex-col items-center">
 					<div class="border-border rounded-xl border-2 bg-white p-4">
-						<img src={generateQR($userAddress.toString())} alt="QR Code" class="h-48 w-48" />
+						<img src={generateQR(userAddress.toString())} alt="QR Code" class="h-48 w-48" />
 					</div>
 					<p class="text-muted-foreground mt-4 text-center text-sm">gimme gimme fundssshhh...</p>
 				</div>
@@ -74,12 +75,12 @@
 					<div class="flex items-center justify-between">
 						<Label class="text-sm font-medium">Your Address</Label>
 						<Badge variant="outline" class="font-mono text-xs">
-							{$userAddress.toString().slice(0, 6)}...{$userAddress.toString().slice(-4)}
+							{userAddress.toString().slice(0, 6)}...{userAddress.toString().slice(-4)}
 						</Badge>
 					</div>
 					<div class="relative">
 						<div class="bg-muted rounded-lg border p-4 font-mono text-sm break-all">
-							{$userAddress}
+							{userAddress}
 						</div>
 					</div>
 				</div>
@@ -97,7 +98,7 @@
 
 				<!-- Warning -->
 				<div class="flex gap-3 rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-4">
-					<AlertCircle class="h-5 w-5 flex-shrink-0 text-yellow-600" />
+					<AlertCircle class="h-5 w-5 shrink-0 text-yellow-600" />
 					<div>
 						<p class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Important</p>
 						<p class="mt-1 text-xs text-yellow-700 dark:text-yellow-300">

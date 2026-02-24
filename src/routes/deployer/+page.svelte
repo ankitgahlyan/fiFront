@@ -14,6 +14,7 @@
 	import SectionLabel from '$lib/components/deployer/SectionLabel.svelte';
 	import Field from '$lib/components/deployer/Field.svelte';
 	import PreviewRow from '$lib/components/deployer/PreviewRow.svelte';
+	import QrScanner from '@/components/common/QrScanner.svelte';
 	import { getJettonAddr } from '@/stores/fi';
 	import { Address } from '@ton/core';
 
@@ -263,6 +264,7 @@
 					hint="This address will be set as the jetton admin and mint recipient. Auto-filled from your wallet."
 					error={fieldError('admin')}
 				>
+					<QrScanner bind:value={admin} />
 					<div class="relative">
 						<input
 							id="admin-addr"
@@ -289,7 +291,23 @@
 				</Field>
 
 				<!-- FI Jetton Address -->
-				<Field
+				{#if admin}
+					<!-- {#await getFiJetton(Address.parse(tonStore.address!)) then } -->
+					<button
+						onclick={async () =>
+							(fiJettonAddr = (await getJettonAddr(Address.parse(admin))).toString({
+								testOnly: true
+							}))}
+						class="absolute top-1/2 right-2.5 -translate-y-1/2 cursor-pointer
+								rounded-md border border-[--color-border2] bg-[--color-surface2] px-2.5
+								py-1 font-mono text-[10px] tracking-wider
+								text-[--color-accent] transition hover:bg-[rgba(14,165,233,.1)]"
+					>
+						SELF
+					</button>
+					<!-- {/await} -->
+				{/if}
+				<!-- <Field
 					id="fi-jetton"
 					label="FI Jetton Address"
 					required
@@ -307,24 +325,8 @@
 							class:input-error={!!fieldError('fiJettonAddr')}
 							class="input-base"
 						/>
-						{#if admin}
-							<!-- {#await getFiJetton(Address.parse(tonStore.address!)) then } -->
-							<button
-								onclick={async () =>
-									(fiJettonAddr = (
-										await getJettonAddr(Address.parse(admin))
-									).toString({testOnly: true}))}
-								class="absolute top-1/2 right-2.5 -translate-y-1/2 cursor-pointer
-								rounded-md border border-[--color-border2] bg-[--color-surface2] px-2.5
-								py-1 font-mono text-[10px] tracking-wider
-								text-[--color-accent] transition hover:bg-[rgba(14,165,233,.1)]"
-							>
-								SELF
-							</button>
-							<!-- {/await} -->
-						{/if}
 					</div>
-				</Field>
+				</Field> -->
 
 				<!-- token name -->
 				<Field id="token-name" label="TOKEN NAME" required hint="full name of your TOKEN">

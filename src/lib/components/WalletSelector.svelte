@@ -1,10 +1,10 @@
 <script lang="ts">
 	import {
-		connectedWallets,
-		activeWalletIndex,
+		getConnectedWallets,
+		getActiveWalletIndex,
 		switchConnectedWallet,
 		disconnectWallet
-	} from '$lib/stores/tonconnect';
+	} from '@/stores/tonconnect.svelte';
 	import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 	import Button from '@/components/ui/button/button.svelte';
 	import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,7 @@
 	}
 </script>
 
-{#if $connectedWallets.length > 0}
+{#if getConnectedWallets().length > 0}
 	<Card>
 		<CardHeader>
 			<div class="flex items-center gap-3">
@@ -39,17 +39,17 @@
 				<div>
 					<CardTitle>Connected Wallets</CardTitle>
 					<CardDescription>
-						{$connectedWallets.length} wallet{$connectedWallets.length !== 1 ? 's' : ''} connected
+						{getConnectedWallets().length} wallet{getConnectedWallets().length !== 1 ? 's' : ''} connected
 					</CardDescription>
 				</div>
 			</div>
 		</CardHeader>
 		<CardContent class="space-y-2">
-			{#each $connectedWallets as walletInfo, index}
+			{#each getConnectedWallets() as walletInfo, index}
 				<div
 					class="group hover:bg-muted/50 flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-all"
-					class:bg-primary={index === $activeWalletIndex}
-					class:border-primary={index === $activeWalletIndex}
+					class:bg-primary={index === getActiveWalletIndex()}
+					class:border-primary={index === getActiveWalletIndex()}
 				>
 					<button
 						class="flex-1 text-left"
@@ -75,7 +75,7 @@
 					</button>
 
 					<div class="flex items-center gap-2">
-						{#if index === $activeWalletIndex}
+						{#if index === getActiveWalletIndex()}
 							<Badge variant="outline" class="whitespace-nowrap">
 								<Check class="mr-1 h-3 w-3" />
 								Active

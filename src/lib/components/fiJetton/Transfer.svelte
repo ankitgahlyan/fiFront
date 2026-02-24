@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { sendTransfer } from '$lib/stores/fi';
-	import { userAddress } from '$lib/stores/tonconnect';
+	import { userAddress } from '@/stores/tonconnect.svelte';
 	import Button from '@/components/ui/button/button.svelte';
 	import { Input } from '@/components/ui/input';
 	import { Label } from '@/components/ui/label';
 	import { Card, CardContent } from '@/components/ui/card';
 	import { Send, AlertCircle } from '@lucide/svelte';
 	import { Address, toNano } from '@ton/core';
+	import QrScanner from '@/components/common/QrScanner.svelte';
 
 	let recipient = $state('');
 	let amount = $state('');
@@ -33,7 +34,10 @@
 <div class="space-y-4">
 	<!-- Recipient -->
 	<div class="space-y-2">
-		<Label for="transfer-recipient">Recipient Address</Label>
+		<div class="flex items-center justify-between">
+			<Label for="transfer-recipient">Recipient Address</Label>
+			<QrScanner />
+		</div>
 		<Input
 			id="transfer-recipient"
 			type="text"

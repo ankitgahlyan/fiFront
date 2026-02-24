@@ -9,11 +9,10 @@ import {
 	toNano,
 	type OpenedContract
 } from '@ton/core';
-import { getTonConnectUI, userAddress } from './tonconnect';
+import { getTonConnectUI, getUserAddress } from './tonconnect.svelte';
 import { FossFi } from '$lib/FossFi';
 import { FossFiWallet } from '$lib/FossFiWallet';
 import { browser } from '$app/environment';
-import { get } from 'svelte/store';
 
 let fi: OpenedContract<FossFi> | null = null;
 
@@ -47,7 +46,7 @@ export async function getFiJetton(ownerAddress: Address) {
 }
 
 export async function getBalance(): Promise<string> {
-	const userAddr = get(userAddress);
+	const userAddr = getUserAddress();
 	if (!userAddr) throw new Error('Wallet not connected');
 	let balance = fromNano((await (await getFiJetton(userAddr)).getGetWalletData()).balance);
 	localStorage.setItem('balance', balance);
@@ -57,7 +56,7 @@ export async function getBalance(): Promise<string> {
 // function loadState() {
 // 	loading = true;
 // 	try {
-// 		if (!$userAddress) throw new Error('Wallet not connected');
+// 		if (!$getUserAddress()) throw new Error('Wallet not connected');
 // 		// jettonStateFull = localStorage.getItem('jettonStateFull');
 // 		throw new Error
 // 	} catch (e) {
@@ -68,8 +67,8 @@ export async function getBalance(): Promise<string> {
 // async function getState() {
 // 	// loading = true;
 // 	try {
-// 		// if (!$userAddress) throw new Error('Wallet not connected');
-// 		jettonStateFull = await (await getFiJetton($userAddress!)).getGetWalletDataFull();
+// 		// if (!$getUserAddress()) throw new Error('Wallet not connected');
+// 		jettonStateFull = await (await getFiJetton($getUserAddress()!)).getGetWalletDataFull();
 // 	} catch (e: any) {
 // 		error = e.message || 'Failed to fetch state';
 // 	} finally {
@@ -85,17 +84,17 @@ export async function sendTransfer(
 ) {
 	try {
 		const tonConnectUI = getTonConnectUI();
-		const fromAddress = get(userAddress);
-		if (!fromAddress) throw new Error('Wallet not connected');
+		const sender = getUserAddress();
+		if (!sender) throw new Error('Wallet not connected');
 
-		const fiJettonAddr = await getJettonAddr(fromAddress);
+		const fiJettonAddr = await getJettonAddr(sender);
 
 		const tb = beginCell()
 			.storeUint(0xf8a7ea5, 32)
 			.storeUint(0, 64) // op, queryId
 			.storeCoins(amount)
 			.storeAddress(toAddress)
-			.storeAddress(fromAddress)
+			.storeAddress(sender)
 			.storeMaybeRef(customPayload)
 			.storeCoins(toNano(1n))
 			.storeMaybeRef(comment(forwardPayload))
